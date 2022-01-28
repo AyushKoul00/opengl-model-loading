@@ -1,9 +1,9 @@
 # OpenGL Template
 
-Clone with `git clone --recurse-submodules -j8 <url>`
+Clone with `git clone --recurse-submodules -j8 <repo>`
 
-This project uses [the premake website](https://premake.github.io).
+This project uses [premake](https://premake.github.io).
 
-Windows project files can be built with clicking on build.bat
+Windows project files can be built with clicking on `build.bat`
 
-To erase project files use clean.bat
+To erase project files use `clean.bat`

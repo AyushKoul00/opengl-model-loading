@@ -1,4 +1,4 @@
-WORKSPACE = "OpenGL Template"
+WORKSPACE = "Model Loading"
 PROJECT = "Test Project"
 
 workspace (WORKSPACE)
@@ -12,9 +12,9 @@ workspace (WORKSPACE)
 	}
 
 -- This is a helper variable, to concatenate the sys-arch
-outputbindir = "bin/%{prj.name}"
+outputbindir = "bin/%{prj.name}/%{cfg.buildcfg}"
 outputobjdir = "bin-int/%{prj.name}"
-targetName = "%{cfg.system}_%{cfg.architecture}_%{cfg.buildcfg}"
+targetName = "%{cfg.system}_%{cfg.architecture}"
 
 newaction {
 	trigger = "clean",
@@ -47,12 +47,15 @@ project (PROJECT)
 	cppdialect "C++17"
 	staticruntime "on"
 
-	targetdir ("%{prj.location}")
+	targetdir ("%{wks.location}")
 	objdir (outputobjdir)
 	targetname (targetName)
 
 	pchheader "pch.h"
 	pchsource "%{prj.location}/src/pch.cpp"
+
+	debugenvs { "PATH=%PATH%;$(SolutionDir)" }
+	debugdir "%{wks.location}"
 
 	files
 	{
@@ -68,9 +71,15 @@ project (PROJECT)
 		"%{wks.location}/vendor/glad/include",
 		"%{wks.location}/vendor/glfw/include",
 		"%{wks.location}/vendor/imgui",
+		"%{wks.location}/vendor/assimp/include",
 		"%{wks.location}/vendor/glm",
 		"%{wks.location}/vendor/spdlog/include",
 		"%{wks.location}/vendor/stb/include"
+	}
+
+	libdirs
+	{
+		"%{wks.location}/vendor/assimp/lib"
 	}
 
 	defines
@@ -83,7 +92,8 @@ project (PROJECT)
 		"glfw",
 		"glad",
 		"ImGui",
-		"stb"
+		"stb",
+		"assimp-vc142-mt.lib"
 	}
 
 	filter "system:windows"
@@ -107,6 +117,8 @@ project (PROJECT)
 	filter "configurations:Debug"
 		runtime "Debug"
 		symbols "on"
+		buildoptions { "/MDd" }
+		optimize "Off"
 
 	filter "configurations:Release"
 		runtime "Release"
