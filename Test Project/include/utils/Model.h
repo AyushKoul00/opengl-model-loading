@@ -42,7 +42,8 @@ private:
         // check for errors
         if (!scene || scene->mFlags & AI_SCENE_FLAGS_INCOMPLETE || !scene->mRootNode) // if is Not Zero
         {
-            cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+            //cout << "ERROR::ASSIMP:: " << importer.GetErrorString() << endl;
+            spdlog::error("ASSIMP:: "s + importer.GetErrorString());
             return;
         }
         // retrieve the directory path of the filepath
@@ -118,6 +119,23 @@ private:
             }
             else
                 vertex.TexCoords = glm::vec2(0.0f, 0.0f);
+            
+
+            if (mesh->HasVertexColors(0))
+            {
+                vertex.Color.x = mesh->mColors[0][i].r;
+                vertex.Color.y = mesh->mColors[0][i].g;
+                vertex.Color.z = mesh->mColors[0][i].b;
+
+                /*static int deb = 0;
+                if (1 || !deb)
+                {
+                cout << "Has colors: " << vertex.Color.x << " " << vertex.Color.y << " " << vertex.Color.z << "\n";
+
+                }
+                deb++;*/
+            }
+
 
             vertices.push_back(vertex);
         }
@@ -131,6 +149,41 @@ private:
         }
         // process materials
         aiMaterial* material = scene->mMaterials[mesh->mMaterialIndex];
+        Material mat;
+        //cout << "# of materials: " << scene->mNumMaterials << "\n";
+        
+        aiColor3D c_ambient(1.0f, 1.0f, 1.0f);
+        if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_AMBIENT, c_ambient))
+        {
+            //No ambient color;
+        }
+        mat.ambientColor = glm::vec3(c_ambient.r, c_ambient.g, c_ambient.b);
+        
+        aiColor3D c_diffuse(1.0f, 1.0f, 1.0f);
+        if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_DIFFUSE, c_diffuse))
+        {
+            //No diffuse color;
+        }
+        mat.diffuseColor = glm::vec3(c_diffuse.r, c_diffuse.g, c_diffuse.b);
+        
+        aiColor3D c_specular(1.0f, 1.0f, 1.0f);
+        if (AI_SUCCESS != material->Get(AI_MATKEY_COLOR_SPECULAR, c_specular))
+        {
+            //No specular color;
+        }
+        mat.specularColor = glm::vec3(c_specular.r, c_specular.g, c_specular.b);
+
+        aiString texture_file;
+        material->Get(AI_MATKEY_TEXTURE(aiTextureType_DIFFUSE, 0), texture_file);
+
+
+
+
+
+
+
+
+
         // we assume a convention for sampler names in the shaders. Each diffuse texture should be named
         // as 'texture_diffuseN' where N is a sequential number ranging from 1 to MAX_SAMPLER_NUMBER. 
         // Same applies to other texture as the following list summarizes:
@@ -151,8 +204,14 @@ private:
         std::vector<Texture> heightMaps = loadMaterialTextures(material, aiTextureType_AMBIENT, "texture_height");
         textures.insert(textures.end(), heightMaps.begin(), heightMaps.end());
 
+
+
+        mat.textures = std::move(textures);
+
+
+
         // return a mesh object created from the extracted mesh data
-        return Mesh(vertices, indices, textures);
+        return Mesh(vertices, indices, mat);
     }
 
     // checks all material textures of a given type and loads the textures if they're not loaded yet.
@@ -202,7 +261,7 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
     unsigned char* data = stbi_load(filename.c_str(), &width, &height, &nrComponents, 0);
     if (data)
     {
-        GLenum format;
+        GLenum format = GL_RGB;
         if (nrComponents == 1)
             format = GL_RED;
         else if (nrComponents == 3)
@@ -223,7 +282,8 @@ unsigned int TextureFromFile(const char* path, const string& directory, bool gam
     }
     else
     {
-        std::cout << "Texture failed to load at path: " << path << std::endl;
+        //std::cout << "Texture failed to load at path: " << path << std::endl;
+        spdlog::error("Texture failed to load at path: "s + path);
         stbi_image_free(data);
     }
 

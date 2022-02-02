@@ -72,14 +72,17 @@ int main()
 	glfwSetCursorPosCallback(window, mouse_callback);
 	glfwSetInputMode(window, GLFW_CURSOR, GLFW_CURSOR_DISABLED);
 	glEnable(GL_DEPTH_TEST);
-	glEnable(GL_CULL_FACE);
+	//glEnable(GL_CULL_FACE);
 	//glPolygonMode(GL_FRONT_AND_BACK, GL_LINE);
 
 	//stbi_set_flip_vertically_on_load(true);
 	Shader shader(vertexPath, fragmentPath);
-	Model ourModel("Test Project/resources/models/suit_model/nanosuit.obj");
+	//Model ourModel("Test Project/resources/models/suit_model/nanosuit.obj");
 	//Model ourModel("Test Project/resources/models/ybot.dae");
 	//Model ourModel("Test Project/resources/models/ybot.fbx");
+	Model ourModel("Test Project/resources/models/Warrok.obj");
+	//Model ourModel("Test Project/resources/models/Warrok.fbx");
+
 
 	float refreshFPS = 0.0f;
 	while (!glfwWindowShouldClose(window))
@@ -101,6 +104,12 @@ int main()
 
 
 		shader.Activate();
+		shader.setVec3("camPos", camera.Position);
+		shader.setVec3("dirLight.direction", -0.2f, -1.0f, -0.3f);
+		//shader.setVec3("dirLight.ambient", 0.05f, 0.05f, 0.05f);
+		//shader.setVec3("dirLight.diffuse", 0.4f, 0.4f, 0.4f);
+		//shader.setVec3("dirLight.specular", 0.5f, 0.5f, 0.5f);
+
 
 		glm::mat4 projection = glm::perspective(glm::radians(camera.Zoom), (float)SCR_WIDTH / (float)SCR_HEIGHT, 0.1f, 100.0f);
 		glm::mat4 view = camera.GetViewMatrix();
@@ -111,6 +120,7 @@ int main()
 		glm::mat4 model = glm::mat4(1.0f);
 		model = glm::translate(model, glm::vec3(0.0f, -1.75f, 0.0f));
 		//model = glm::scale(model, glm::vec3(0.1f, 0.1f, 0.1f));
+		model = glm::scale(model, glm::vec3(10.0f, 10.0f, 10.0f));
 		model = glm::scale(model, glm::vec3(0.2f, 0.2f, 0.2f));
 
 		shader.setMat4("model", model);
@@ -127,6 +137,7 @@ int main()
 	glfwTerminate();
 	return 0;
 }
+
 void processInput(GLFWwindow* window)
 {
 	if (glfwGetKey(window, GLFW_KEY_ESCAPE) == GLFW_PRESS)

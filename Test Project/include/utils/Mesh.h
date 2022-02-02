@@ -24,6 +24,9 @@ struct Vertex {
     int m_BoneIDs[MAX_BONE_INFLUENCE];
     //weights from each bone
     float m_Weights[MAX_BONE_INFLUENCE];
+
+    // Color
+    glm::vec3 Color;
 };
 
 struct Texture {
@@ -32,16 +35,29 @@ struct Texture {
     std::string path;
 };
 
+
+struct Material
+{
+    glm::vec3 ambientColor;
+    glm::vec3 diffuseColor;
+    glm::vec3 specularColor;
+
+    std::vector<Texture> textures;
+};
+
+
 class Mesh {
 public:
     // mesh Data
     std::vector<Vertex>       vertices;
     std::vector<unsigned int> indices;
-    std::vector<Texture>      textures;
+    //std::vector<Texture>      textures;
+    Material mat;
     VAO vao;
 
     // constructor
-    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    //Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, std::vector<Texture> textures);
+    Mesh(std::vector<Vertex> vertices, std::vector<unsigned int> indices, Material mat);
 
     // render the mesh
     void Draw(Shader& shader);
